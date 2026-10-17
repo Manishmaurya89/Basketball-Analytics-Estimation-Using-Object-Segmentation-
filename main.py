@@ -35,11 +35,41 @@ def parse_args():
                         help='Path to stub directory')
     return parser.parse_args()
 
+def validate_paths(input_video, output_video, model_paths):
+    """Fail early with actionable messages when required inputs are missing."""
+    if not os.path.isfile(input_video):
+        raise FileNotFoundError(f"Input video not found: {input_video}")
+
+    missing_models = [path for path in model_paths if not os.path.isfile(path)]
+    if missing_models:
+        formatted = "\n".join(f"  - {path}" for path in missing_models)
+        raise FileNotFoundError(
+            "Required model weight file(s) are missing:\n"
+            f"{formatted}\n"
+            "Download the pretrained weights described in README.md or train your own models."
+        )
+
+    output_dir = os.path.dirname(os.path.abspath(output_video))
+    os.makedirs(output_dir, exist_ok=True)
+
+
 def main():
     args = parse_args()
-    
+
+    model_paths = [
+        PLAYER_DETECTOR_PATH,
+        BALL_DETECTOR_PATH,
+        COURT_KEYPOINT_DETECTOR_PATH,
+    ]
+    validate_paths(args.input_video, args.output_video, model_paths)
+
     # Read Video
     video_frames = read_video(args.input_video)
+    if not video_frames:
+        raise RuntimeError(
+            f"No frames could be read from '{args.input_video}'. "
+            "Check that the file is a valid, supported video."
+        )
     
     ## Initialize Tracker
     player_tracker = PlayerTracker(PLAYER_DETECTOR_PATH)

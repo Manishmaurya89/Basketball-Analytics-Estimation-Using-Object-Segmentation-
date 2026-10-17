@@ -75,17 +75,28 @@ def save_video(ouput_video_frames, output_video_path):
         ouput_video_frames (list): List of frames to save.
         output_video_path (str): Path where the video should be saved.
     """
-    # If folder doesn't exist, create it
-    if not os.path.exists(os.path.dirname(output_video_path)):
-        os.makedirs(os.path.dirname(output_video_path))
-    
-    # Check if there are any frames to save
+    # Resolve the directory so paths like "output.avi" work too.
+    output_dir = os.path.dirname(os.path.abspath(output_video_path))
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Do not silently produce an empty or missing output file.
     if not ouput_video_frames:
-        print(f"Error: No frames to save to {output_video_path}")
-        return
-    
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(output_video_path, fourcc, 24, (ouput_video_frames[0].shape[1], ouput_video_frames[0].shape[0]))
-    for frame in ouput_video_frames:
-        out.write(frame)
-    out.release()
+        raise ValueError(f"No frames to save to {output_video_path}")
+
+    height, width = ouput_video_frames[0].shape[:2]
+    fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    out = cv2.VideoWriter(output_video_path, fourcc, 24, (width, height))
+    if not out.isOpened():
+        out.release()
+        raise RuntimeError(
+            f"Could not create output video at {output_video_path}. "
+            "Check the output path and video codec support."
+        )
+
+    try:
+        for frame in ouput_video_frames:
+            if frame.shape[:2] != (height, width):
+                raise ValueError("All output video frames must have the same dimensions.")
+            out.write(frame)
+    finally:
+        out.release()
