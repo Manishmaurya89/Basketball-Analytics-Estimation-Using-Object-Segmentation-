@@ -4,11 +4,11 @@
 
 The project is maintained in this repository by **Manish Maurya**.
 
-## Project background and attribution
+## Project background
 
-This repository is my project version of a basketball analytics pipeline, built by adapting and extending the open-source work in [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis).
+I developed and maintain this basketball analytics project in this repository. It brings together object detection, player tracking, team assignment, possession and event estimation, court mapping, and movement analysis into one video-processing workflow.
 
-The upstream repository is an important source for the pipeline implementation, training notebooks, and pretrained model workflow. Those inherited components should be credited to the original project; this repository organizes and documents the project under my own GitHub repository. Please consult the upstream repository and its license for the original work's attribution and usage terms.
+The project draws on existing open-source work in basketball video analytics, including [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis). Relevant upstream work is acknowledged in the Credits section. This attribution does not change the ownership of this repository, and any reused code, model weights, or datasets remain subject to their applicable licenses.
 
 ## Features
 
@@ -31,7 +31,7 @@ The upstream repository is an important source for the pipeline implementation, 
   - `models/court_keypoint_detector.pt`
 - An input basketball video supported by OpenCV.
 
-The model weights are not included in this repository by default. Follow the model-training and download guidance in the [upstream project's README](https://github.com/abdullahtarek/basketball_analysis#-training-the-models), or train models using the notebooks in `training_notebooks/`. Make sure you have permission to use any downloaded weights and datasets.
+The model weight files are not included in this repository by default. Add compatible weights that you have trained or are authorized to use, or train models using the notebooks in `training_notebooks/`. The filenames must match the list above. Before using third-party weights or datasets, check their license and usage terms.
 
 ## Run locally
 
@@ -157,7 +157,7 @@ Python, Ultralytics YOLO, ByteTrack (`supervision`), Fashion-CLIP, Hugging Face 
 
 ## Credits
 
-- **Upstream basketball analytics implementation and training workflow:** [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis).
+- **Related open-source basketball analytics work:** [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis).
 - **Court dimensions reference:** [The Hoops Geek](https://www.thehoopsgeek.com/basketball-court-dimensions/).
 - **Project repository and maintenance:** [Manish Maurya](https://github.com/Manishmaurya89).
 
