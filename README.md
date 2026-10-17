@@ -21,11 +21,9 @@ The pipeline code, training notebooks and pretrained model weights come from tha
 
 ## Getting started
 
-All of the code is in the `github_upload/` folder.
-
 ### 1. Get the models
 
-The pipeline needs three model files in `github_upload/models/`:
+The pipeline needs three model files in `models/`:
 
 - `player_detector.pt`
 - `ball_detector_model.pt`
@@ -33,13 +31,13 @@ The pipeline needs three model files in `github_upload/models/`:
 
 You can download the pretrained weights from the links in the
 [original project's README](https://github.com/abdullahtarek/basketball_analysis#-training-the-models), or train
-your own with the notebooks in `github_upload/training_notebooks/`.
+your own with the notebooks in `training_notebooks/`.
 
 ### 2. Run it with Python
 
 ```bash
 git clone https://github.com/Manishmaurya89/Basketball-Analytics-Estimation-Using-Object-Segmentation-.git
-cd Basketball-Analytics-Estimation-Using-Object-Segmentation-/github_upload
+cd Basketball-Analytics-Estimation-Using-Object-Segmentation-
 
 pip install -r requirements.txt
 python main.py path/to/game.mp4 --output_video output_videos/output_video.avi
@@ -47,10 +45,10 @@ python main.py path/to/game.mp4 --output_video output_videos/output_video.avi
 
 ### Or run it with Docker
 
-Put the model files in `github_upload/models/` first so they get copied into the image.
+Put the model files in `models/` first so they get copied into the image.
 
 ```bash
-cd Basketball-Analytics-Estimation-Using-Object-Segmentation-/github_upload
+cd Basketball-Analytics-Estimation-Using-Object-Segmentation-
 docker build -t basketball-analytics .
 docker run \
   -v "$(pwd)/input_videos:/app/input_videos" \
@@ -79,7 +77,7 @@ Input video
 ## Project layout
 
 ```
-github_upload/
+Basketball-Analytics-Estimation-Using-Object-Segmentation-/
 ├── main.py                          runs the whole pipeline
 ├── configs/                         model and output paths
 ├── trackers/                        player and ball detection and tracking
