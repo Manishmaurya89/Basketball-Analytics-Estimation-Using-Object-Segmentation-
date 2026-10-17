@@ -42,10 +42,10 @@ def validate_paths(input_video, output_video, model_paths):
 
     missing_models = [path for path in model_paths if not os.path.isfile(path)]
     if missing_models:
-        formatted = "\\n".join(f"  - {path}" for path in missing_models)
+        formatted = "\n".join(f"  - {path}" for path in missing_models)
         raise FileNotFoundError(
-            "Required model weight file(s) are missing:\\n"
-            f"{formatted}\\n"
+            "Required model weight file(s) are missing:\n"
+            f"{formatted}\n"
             "Download the pretrained weights described in README.md or train your own models."
         )
 
