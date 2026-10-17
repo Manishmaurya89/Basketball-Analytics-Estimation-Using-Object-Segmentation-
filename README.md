@@ -6,9 +6,9 @@ The project is maintained in this repository by **Manish Maurya**.
 
 ## Project background
 
-I developed and maintain this basketball analytics project in this repository. It brings together object detection, player tracking, team assignment, possession and event estimation, court mapping, and movement analysis into one video-processing workflow.
+This is my basketball video analytics project, maintained by **Manish Maurya**. I am improving the repository's reliability, setup, and documentation while bringing detection, tracking, team assignment, possession and event estimation, court mapping, and movement analysis into one workflow.
 
-The project draws on existing open-source work in basketball video analytics, including [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis). Relevant upstream work is acknowledged in the Credits section. This attribution does not change the ownership of this repository, and any reused code, model weights, or datasets remain subject to their applicable licenses.
+The codebase builds on related open-source basketball analytics work. See the Credits section for attribution; reused code, model weights, and datasets remain subject to their original licenses.
 
 ## Features
 
@@ -157,7 +157,7 @@ Python, Ultralytics YOLO, ByteTrack (`supervision`), Fashion-CLIP, Hugging Face 
 
 ## Credits
 
-- **Related open-source basketball analytics work:** [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis).
+- **Upstream open-source codebase:** [abdullahtarek/basketball_analysis](https://github.com/abdullahtarek/basketball_analysis).
 - **Court dimensions reference:** [The Hoops Geek](https://www.thehoopsgeek.com/basketball-court-dimensions/).
 - **Project repository and maintenance:** [Manish Maurya](https://github.com/Manishmaurya89).
 
