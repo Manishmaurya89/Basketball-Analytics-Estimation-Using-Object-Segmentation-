@@ -74,6 +74,23 @@ Input video
   -> Everything is drawn onto the output video
 ```
 
+## The court
+
+The tactical view draws every player onto this top-down court (`images/basketball_court.png`):
+
+<p align="center">
+  <img src="images/basketball_court.png" width="600" alt="Top-down basketball court used for the tactical view">
+</p>
+
+Speed and distance are measured on a standard 28 m × 15 m court. The court keypoints are placed using these
+measurements (`images/basketball-court-dimensions.png`):
+
+<p align="center">
+  <img src="images/basketball-court-dimensions.png" width="600" alt="Basketball court dimensions in metres">
+</p>
+
+Court diagrams from [The Hoops Geek](https://www.thehoopsgeek.com/basketball-court-dimensions/).
+
 ## Project layout
 
 ```
@@ -90,6 +107,7 @@ Basketball-Analytics-Estimation-Using-Object-Segmentation-/
 ├── drawers/                         draws everything onto each frame
 ├── utils/                           video input/output, box helpers, caching
 ├── training_notebooks/              notebooks for training the three YOLO models
+├── images/                          court images for the tactical view
 ├── stubs/                           cached results for the sample video
 ├── Dockerfile
 └── requirements.txt
