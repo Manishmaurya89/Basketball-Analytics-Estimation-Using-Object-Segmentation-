@@ -17,12 +17,7 @@ class PassInterceptionDrawer:
         )
 
     def draw(self, video_frames, passes, interceptions):
-        output_video_frames = []
-        for frame_num, frame in enumerate(video_frames):
-            if frame_num == 0:
-                continue
-            output_video_frames.append(self.draw_frame(frame, frame_num, passes, interceptions))
-        return output_video_frames
+        return [self.draw_frame(frame, frame_num, passes, interceptions) for frame_num, frame in enumerate(video_frames)]
 
     def draw_frame(self, frame, frame_num, passes, interceptions):
         font_scale = 0.7

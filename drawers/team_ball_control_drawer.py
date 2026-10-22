@@ -20,12 +20,7 @@ class TeamBallControlDrawer:
     def draw(self, video_frames, player_assignment, ball_aquisition):
         team_ball_control = self.get_team_ball_control(player_assignment, ball_aquisition)
 
-        output_video_frames = []
-        for frame_num, frame in enumerate(video_frames):
-            if frame_num == 0:
-                continue
-            output_video_frames.append(self.draw_frame(frame, frame_num, team_ball_control))
-        return output_video_frames
+        return [self.draw_frame(frame, frame_num, team_ball_control) for frame_num, frame in enumerate(video_frames)]
 
     def draw_frame(self, frame, frame_num, team_ball_control):
         font_scale = 0.7
