@@ -1,5 +1,5 @@
 import numpy as np
-import cv2 
+import cv2
 
 class Homography:
     def __init__(self, source: np.ndarray, target: np.ndarray) -> None:
@@ -24,8 +24,3 @@ class Homography:
         points = points.reshape(-1, 1, 2).astype(np.float32)
         points = cv2.perspectiveTransform(points, self.m)
         return points.reshape(-1, 2).astype(np.float32)
-
-
-
-
-

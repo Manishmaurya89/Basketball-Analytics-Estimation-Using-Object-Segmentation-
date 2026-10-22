@@ -1,84 +1,37 @@
 from ultralytics import YOLO
 import supervision as sv
-import sys 
-sys.path.append('../')
 from utils import read_stub, save_stub
 
+
 class PlayerTracker:
-    """
-    A class that handles player detection and tracking using YOLO and ByteTrack.
+    """Detects players with YOLO and keeps their IDs stable across frames with ByteTrack."""
 
-    This class combines YOLO object detection with ByteTrack tracking to maintain consistent
-    player identities across frames while processing detections in batches.
-    """
     def __init__(self, model_path):
-        """
-        Initialize the PlayerTracker with YOLO model and ByteTrack tracker.
-
-        Args:
-            model_path (str): Path to the YOLO model weights.
-        """
-        self.model = YOLO(model_path) 
+        self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
 
-    def detect_frames(self, frames):
-        """
-        Detect players in a sequence of frames using batch processing.
-
-        Args:
-            frames (list): List of video frames to process.
-
-        Returns:
-            list: YOLO detection results for each frame.
-        """
-        batch_size=20 
-        detections = [] 
-        for i in range(0,len(frames),batch_size):
-            detections_batch = self.model.predict(frames[i:i+batch_size],conf=0.5)
-            detections += detections_batch
+    def detect_frames(self, frames, batch_size=20):
+        detections = []
+        for i in range(0, len(frames), batch_size):
+            detections += self.model.predict(frames[i:i + batch_size], conf=0.5)
         return detections
 
     def get_object_tracks(self, frames, read_from_stub=False, stub_path=None):
-        """
-        Get player tracking results for a sequence of frames with optional caching.
+        """Return one dict per frame mapping track_id -> {"bbox": [x1, y1, x2, y2]}."""
+        tracks = read_stub(read_from_stub, stub_path)
+        if tracks is not None and len(tracks) == len(frames):
+            return tracks
 
-        Args:
-            frames (list): List of video frames to process.
-            read_from_stub (bool): Whether to attempt reading cached results.
-            stub_path (str): Path to the cache file.
+        tracks = []
+        for detection in self.detect_frames(frames):
+            player_class_id = {name: cls_id for cls_id, name in detection.names.items()}['Player']
+            detections = self.tracker.update_with_detections(sv.Detections.from_ultralytics(detection))
 
-        Returns:
-            list: List of dictionaries containing player tracking information for each frame,
-                where each dictionary maps player IDs to their bounding box coordinates.
-        """
-        tracks = read_stub(read_from_stub,stub_path)
-        if tracks is not None:
-            if len(tracks) == len(frames):
-                return tracks
+            frame_tracks = {}
+            for bbox, _, _, cls_id, track_id, *_ in detections:
+                if cls_id == player_class_id:
+                    frame_tracks[track_id] = {"bbox": bbox.tolist()}
+            tracks.append(frame_tracks)
 
-        detections = self.detect_frames(frames)
-
-        tracks=[]
-
-        for frame_num, detection in enumerate(detections):
-            cls_names = detection.names
-            cls_names_inv = {v:k for k,v in cls_names.items()}
-
-            # Covert to supervision Detection format
-            detection_supervision = sv.Detections.from_ultralytics(detection)
-
-            # Track Objects
-            detection_with_tracks = self.tracker.update_with_detections(detection_supervision)
-
-            tracks.append({})
-
-            for frame_detection in detection_with_tracks:
-                bbox = frame_detection[0].tolist()
-                cls_id = frame_detection[3]
-                track_id = frame_detection[4]
-
-                if cls_id == cls_names_inv['Player']:
-                    tracks[frame_num][track_id] = {"bbox":bbox}
-        
-        save_stub(stub_path,tracks)
+        save_stub(stub_path, tracks)
         return tracks

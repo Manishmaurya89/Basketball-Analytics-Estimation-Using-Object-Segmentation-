@@ -1,112 +1,71 @@
-import os
-import sys
-import pathlib
-folder_path = pathlib.Path(__file__).parent.resolve()
-sys.path.append(os.path.join(folder_path,"../"))
 from utils import measure_distance
 
 
-class SpeedAndDistanceCalculator():
-    def __init__(self, 
-                 width_in_pixels,
-                 height_in_pixels,
-                 width_in_meters,
-                 height_in_meters,
-                 ):
-        
+class SpeedAndDistanceCalculator:
+    """Converts tactical-view pixel positions into metres moved and km/h."""
+
+    def __init__(self, width_in_pixels, height_in_pixels, width_in_meters, height_in_meters):
         self.width_in_pixels = width_in_pixels
-        self.height_in_pixels= height_in_pixels
-
+        self.height_in_pixels = height_in_pixels
         self.width_in_meters = width_in_meters
-        self.height_in_meters= height_in_meters
+        self.height_in_meters = height_in_meters
 
-    def calculate_distance(self,
-                            tactical_player_positions
-                            ):
-        previous_players_position = {}
-        output_distances =[]
+    def calculate_distance(self, tactical_player_positions):
+        """Return one dict per frame with the metres each player moved since they were last seen."""
+        last_positions = {}
+        output_distances = []
 
-        for frame_number, tactical_player_position_frame in enumerate(tactical_player_positions):
-            output_distances.append({})
+        for frame_positions in tactical_player_positions:
+            frame_distances = {}
+            for player_id, position in frame_positions.items():
+                if player_id in last_positions:
+                    frame_distances[player_id] = self.calculate_meter_distance(last_positions[player_id], position)
+                last_positions[player_id] = position
+            output_distances.append(frame_distances)
 
-            for player_id, current_player_position in tactical_player_position_frame.items():
-                # Calculate distance
-                if player_id in previous_players_position:
-                    previous_position = previous_players_position[player_id]
-                    meter_distance = self.calculate_meter_distance(previous_position, current_player_position)
-                    output_distances[frame_number][player_id] = meter_distance
-
-                previous_players_position[player_id]=current_player_position
-        
         return output_distances
 
-    def calculate_meter_distance(self,previous_pixel_position, current_pixel_position):
-         # using width_in_pixels,height_in_pixels and width_in_meters,height_in_meters Calculate the meter distance betweent current position and previous position
-         previous_pixel_x, previous_pixel_y = previous_pixel_position
-         current_pixel_x, current_pixel_y = current_pixel_position
+    def calculate_meter_distance(self, previous_pixel_position, current_pixel_position):
+        x_scale = self.width_in_meters / self.width_in_pixels
+        y_scale = self.height_in_meters / self.height_in_pixels
 
-         previous_meter_x = previous_pixel_x * self.width_in_meters / self.width_in_pixels
-         previous_meter_y = previous_pixel_y * self.height_in_meters / self.height_in_pixels
+        previous = (previous_pixel_position[0] * x_scale, previous_pixel_position[1] * y_scale)
+        current = (current_pixel_position[0] * x_scale, current_pixel_position[1] * y_scale)
 
-         current_meter_x = current_pixel_x * self.width_in_meters / self.width_in_pixels
-         current_meter_y = current_pixel_y * self.height_in_meters / self.height_in_pixels
+        # Empirical scale factor, not derived from the court size.
+        return measure_distance(current, previous) * 0.4
 
-         meter_distance =measure_distance((current_meter_x,current_meter_y),
-                                          (previous_meter_x,previous_meter_y)
-                                          )
+    def calculate_speed(self, distances, fps=30, window_size=5):
+        """Return one dict per frame mapping player_id -> speed in km/h.
 
-         meter_distance = meter_distance*0.4
-         return meter_distance
-
-    def calculate_speed(self, distances, fps=30):
-        """
-        Calculate player speeds based on distances covered over the last 5 frames.
-        
-        Args:
-            distances (list): List of dictionaries containing distance per player per frame,
-                            as output by calculate_distance method.
-            fps (float): Frames per second of the video, used to calculate elapsed time.
-            
-        Returns:
-            list: List of dictionaries where each dictionary maps player_id to their
-                speed in km/h at that frame.
+        Speed is averaged over the last `window_size * 3` frames, and stays 0
+        until the player has at least `window_size` distance readings in that window.
         """
         speeds = []
-        window_size = 5  # Look at last 5 frames for speed calculation
-        
-        # Calculate speed for each frame and player
+
         for frame_idx in range(len(distances)):
-            speeds.append({})
-            # For each player in current frame
-            for player_id in distances[frame_idx].keys():
-                # Look back window_size frames or fewer if at the beginning
-                start_frame = max(0, frame_idx - (window_size * 3) + 1)
-                
+            frame_speeds = {}
+            start_frame = max(0, frame_idx - window_size * 3 + 1)
+
+            for player_id in distances[frame_idx]:
                 total_distance = 0
                 frames_present = 0
-                last_frame_present = None
-                
-                # Calculate total distance in the window
+                seen_before = False
+
                 for i in range(start_frame, frame_idx + 1):
                     if player_id in distances[i]:
-                        if last_frame_present is not None:
+                        # The first reading in the window has no earlier frame to pair with.
+                        if seen_before:
                             total_distance += distances[i][player_id]
                             frames_present += 1
-                        last_frame_present = i
-                
-                # Calculate speed only if player was present in at least two frames
+                        seen_before = True
+
                 if frames_present >= window_size:
-                    # Calculate time in hours (convert frames to hours)
-                    time_in_seconds = frames_present / fps
-                    time_in_hours = time_in_seconds / 3600
-                    
-                    # Calculate speed in km/h
-                    if time_in_hours > 0:
-                        speed_kmh = (total_distance / 1000) / time_in_hours
-                        speeds[frame_idx][player_id] = speed_kmh
-                    else:
-                        speeds[frame_idx][player_id] = 0
+                    hours = frames_present / fps / 3600
+                    frame_speeds[player_id] = (total_distance / 1000) / hours
                 else:
-                    speeds[frame_idx][player_id] = 0
-        
+                    frame_speeds[player_id] = 0
+
+            speeds.append(frame_speeds)
+
         return speeds
